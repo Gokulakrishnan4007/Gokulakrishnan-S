@@ -1,0 +1,72 @@
+Source Code
+
+import numpy as np
+import pandas as pd 
+import seaborn as sns 
+import matplotlib.pyplot as plt 
+%matplotlib inline
+data=pd.read_csv('employee churn.csv')
+data.head()
+data.tail()
+data.info()
+data.describe()
+data.shape
+data.dtypes
+pd.isna(data).sum()
+data.isna().count()
+data.groupby(['left']).count()
+left_count=data.groupby('left').count() 
+plt.bar(left_count.index.values, left_count['satisfaction_level']) 
+plt.xlabel('Employees Left Company') plt.ylabel('Number of Employees') 
+plt.show()
+data.left.value_counts()
+num_projects=data.groupby('number_project').count() 
+plt.bar(num_projects.index.values, num_projects['satisfaction_level']) 
+plt.xlabel('Number of Projects') 
+plt.ylabel('Number of Employees') 
+plt.show()
+time_spent=data.groupby('time_spend_company').count() 
+plt.bar(time_spent.index.values, time_spent['satisfaction_level']) 
+plt.xlabel('Number of Years Spend in Company') 
+plt.ylabel('Number of Employees') 
+plt.show()
+features=['number_project','time_spend_company','Work_accident','left',  'promotion_last_5years','Departments ','salary'] 
+fig=plt.subplots(figsize=(10,15)) 
+for i, j in enumerate(features): 
+	plt.subplot(4, 2, i+1) 
+	plt.subplots_adjust(hspace = 1.0) 
+	sns.countplot(x=j,data = data) 
+	plt.xticks(rotation=90) 
+	plt.title("No. of employee")
+fig=plt.subplots(figsize=(10,15)) 
+for i, j in enumerate(features): 
+	plt.subplot(4, 2, i+1) 
+	plt.subplots_adjust(hspace = 1.0) 
+	sns.countplot(x=j,data = data, hue='left') 
+	plt.xticks(rotation=90) 
+	plt.title("No. of employee")
+from sklearn.cluster import KMeans
+left_emp = data[['satisfaction_level', 'last_evaluation']][data.left == 1] 
+kmeans = KMeans(n_clusters = 3, random_state = 0).fit(left_emp)
+left_emp['label'] = kmeans.labels_ 
+plt.scatter(left_emp['satisfaction_level'],left_emp['last_evaluation'], c=left_emp['label'],cmap='Accent') 
+plt.xlabel('Satisfaction Level') 
+plt.ylabel('Last Evaluation') 
+plt.title('3 Clusters of employees who left') 
+plt.show()
+from sklearn import preprocessing 
+le = preprocessing.LabelEncoder() 
+data['salary']=le.fit_transform(data['salary'])
+data['Departments ']=le.fit_transform(data['Departments '])
+X=data[['satisfaction_level', 'last_evaluation', 'number_project', 'average_montly_hours', 'time_spend_company', 'Work_accident', 'promotion_last_5years', 'Departments ', 'salary']]
+ y=data['left']
+from sklearn.model_selection import train_test_split  
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20,random_state=42)
+from sklearn.ensemble import GradientBoostingClassifier 
+gb = GradientBoostingClassifier() 
+gb.fit(X_train, y_train) 
+y_pred = gb.predict(X_test)
+from sklearn import metrics 
+print("Accuracy:",metrics.accuracy_score(y_test,y_pred)) 
+print("Precision:",metrics.precision_score(y_test,y_pred)) 
+print("Recall:",metrics.recall_score(y_test, y_pred))
